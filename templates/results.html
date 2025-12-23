@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты тестирования</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .results-summary {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .score {
+            font-size: 3em;
+            font-weight: bold;
+            color: #28a745;
+            margin: 20px 0;
+        }
+
+        .score-details {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .results-list {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-item.correct {
+            border-left: 4px solid #28a745;
+        }
+
+        .result-item.incorrect {
+            border-left: 4px solid #dc3545;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .user-answer {
+            color: #dc3545;
+            margin: 5px 0;
+        }
+
+        .correct-answer {
+            color: #28a745;
+            margin: 5px 0;
+        }
+
+        .links {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .links a, .links button {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .links a:hover, .links button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        .history-table th, .history-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .history-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .history-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tab-button {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Результаты тестирования</h1>
+            <p>Просмотр ваших результатов и истории прохождения</p>
+        </div>
+
+        <div class="error" id="errorMessage"></div>
+
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="showTab('last')">Последний тест</button>
+            <button class="tab-button" onclick="showTab('history')">История тестов</button>
+        </div>
+
+        <!-- Вкладка последнего теста -->
+        <div id="lastTab" class="tab-content active">
+            <div class="loading" id="lastLoading">
+                <p>Загрузка результатов последнего теста...</p>
+            </div>
+
+            <div id="lastResults" style="display: none;">
+                <div class="results-summary">
+                    <h2>Результаты вашего последнего теста</h2>
+                    <div class="score" id="lastScore">0/0</div>
+                    <div class="score-details">
+                        Пользователь: <span id="lastUsername"></span><br>
+                        Дата прохождения: <span id="lastDate"></span>
+                    </div>
+                </div>
+
+                <div class="results-list" id="lastResultsList">
+                    <!-- Здесь будут отображаться детали результатов -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка истории тестов -->
+        <div id="historyTab" class="tab-content">
+            <div class="loading" id="historyLoading">
+                <p>Загрузка истории тестов...</p>
+            </div>
+
+            <div id="historyResults" style="display: none;">
+                <h2>История всех тестов</h2>
+                <table class="history-table" id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Пользователь</th>
+                            <th>Результат</th>
+                            <th>Детали</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- Данные будут загружены через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="/">← Вернуться к тесту</a>
+            <button onclick="downloadResults()">Скачать результаты (JSON)</button>
+            <a href="/admin/questions">Админ-панель</a>
+        </div>
+
+    </div>
+
+    <script>
+        // Функция для отображения ошибок
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Функция переключения вкладок
+        function showTab(tabName) {
+            // Обновляем активные кнопки вкладок
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Активируем выбранную вкладку
+            if (tabName === 'last') {
+                document.querySelector('.tab-button:nth-child(1)').classList.add('active');
+                document.getElementById('lastTab').classList.add('active');
+                loadLastResults();
+            } else {
+                document.querySelector('.tab-button:nth-child(2)').classList.add('active');
+                document.getElementById('historyTab').classList.add('active');
+                loadHistory();
+            }
+        }
+
+        // Функция загрузки последних результатов
+        function loadLastResults() {
+            const lastResult = localStorage.getItem('lastTestResult');
+
+            if (lastResult) {
+                try {
+                    const result = JSON.parse(lastResult);
+                    displayLastResults(result);
+                } catch (e) {
+                    showError('Ошибка при чтении результатов');
+                }
+            } else {
+                // Пытаемся загрузить с сервера
+                fetch('/api/results')
+                    .then(response => response.json())
+                    .then(results => {
+                        if (results.length > 0) {
+                            const lastResult = results[results.length - 1];
+                            displayLastResults(lastResult);
+                        } else {
+                            document.getElementById('lastLoading').innerHTML =
+                                '<p>Результаты не найдены. Пройдите тест сначала.</p>';
+                        }
+                    })
+                    .catch(error => {
+                        showError('Ошибка загрузки результатов: ' + error.message);
+                    });
+            }
+        }
+
+        // Функция отображения последних результатов
+        function displayLastResults(result) {
+            document.getElementById('lastLoading').style.display = 'none';
+            document.getElementById('lastResults').style.display = 'block';
+
+            // Заполняем общую информацию
+            document.getElementById('lastScore').textContent =
+                `${result.score}/${result.total}`;
+            document.getElementById('lastUsername').textContent = result.username;
+            document.getElementById('lastDate').textContent = result.date || 'Не указано';
+
+            // Заполняем детальные результаты
+            const resultsList = document.getElementById('lastResultsList');
+            let html = '';
+
+            if (result.results && Array.isArray(result.results)) {
+                result.results.forEach((item, index) => {
+                    const isCorrect = item.isCorrect;
+                    const userAnswerText = item.options[item.userAnswer];
+                    const correctAnswerText = item.options[item.correctAnswer];
+
+                    html += `
+                        <div class="result-item ${isCorrect ? 'correct' : 'incorrect'}">
+                            <div class="question-text">${index + 1}. ${item.question}</div>
+                            <div class="user-answer">Ваш ответ: ${String.fromCharCode(65 + item.userAnswer)}. ${userAnswerText}</div>
+                            ${!isCorrect ? `<div class="correct-answer">Правильный ответ: ${String.fromCharCode(65 + item.correctAnswer)}. ${correctAnswerText}</div>` : ''}
+                            <div style="margin-top: 10px; color: ${isCorrect ? '#28a745' : '#dc3545'}; font-weight: 600;">
+                                ${isCorrect ? '✓ Правильно' : '✗ Неправильно'}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            resultsList.innerHTML = html;
+        }
+
+        // Функция загрузки истории тестов
+        function loadHistory() {
+            document.getElementById('historyLoading').style.display = 'block';
+            document.getElementById('historyResults').style.display = 'none';
+
+            fetch('/api/results')
+                .then(response => response.json())
+                .then(results => {
+                    document.getElementById('historyLoading').style.display = 'none';
+                    document.getElementById('historyResults').style.display = 'block';
+
+                    const tableBody = document.getElementById('historyTableBody');
+
+                    if (results.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px;">
+                                    История тестов пуста
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    // Сортируем по дате (новые сверху)
+                    results.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    let html = '';
+                    results.forEach(result => {
+                        const scorePercentage = result.total > 0 ?
+                            Math.round((result.score / result.total) * 100) : 0;
+
+                        html += `
+                            <tr>
+                                <td>${result.date || 'Не указано'}</td>
+                                <td>${result.username}</td>
+                                <td>
+                                    <strong>${result.score}/${result.total}</strong>
+                                    <br>
+                                    <small>${scorePercentage}%</small>
+                                </td>
+                                <td>
+                                    <button onclick="viewResultDetails('${result.date}', '${result.username}')"
+                                            style="padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                        Просмотр
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableBody.innerHTML = html;
+                })
+                .catch(error => {
+                    showError('Ошибка загрузки истории: ' + error.message);
+                    document.getElementById('historyLoading').innerHTML =
+                        '<p>Ошибка загрузки истории тестов</p>';
+                });
+        }
+
+        // Функция просмотра деталей результата
+        function viewResultDetails(date, username) {
+            alert(`Детали результата:\nДата: ${date}\nПользователь: ${username}\n\nПолная информация доступна в консоли разработчика.`);
+
+            // Для отладки: выводим в консоль
+            console.log('Просмотр деталей результата:', {date, username});
+
+            // Можно реализовать более детальный просмотр через модальное окно
+            // Для простоты оставляем alert
+        }
+
+        // Функция скачивания результатов
+        function downloadResults() {
+            fetch('/api/results')
+                .then(response => response.json())
+                .then(results => {
+                    const dataStr = JSON.stringify(results, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+                    const exportFileDefaultName = 'test_results.json';
+
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+                })
+                .catch(error => {
+                    showError('Ошибка при скачивании результатов: ' + error.message);
+                });
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница результатов загружена.');
+            loadLastResults();
+
+            // Для отладки: добавляем горячую клавишу Ctrl+D
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'd') {
+                    e.preventDefault();
+                    console.log('Результаты из localStorage:', localStorage.getItem('lastTestResult'));
+                    console.log('Текущий URL:', window.location.href);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

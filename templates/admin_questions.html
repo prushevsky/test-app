@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Административная панель - Вопросы теста</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2em;
+        }
+
+        .user-info {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .user-info span {
+            color: #667eea;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Панель действий */
+        .action-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        /* Статистика */
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Таблица вопросов */
+        .questions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        .questions-table th,
+        .questions-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .questions-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+
+        .questions-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .question-id {
+            width: 60px;
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .question-text {
+            min-width: 300px;
+        }
+
+        .question-options {
+            min-width: 250px;
+        }
+
+        .question-correct {
+            width: 100px;
+            text-align: center;
+        }
+
+        .question-visible {
+            width: 100px;
+            text-align: center;
+        }
+
+        .visible-true {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .visible-false {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .correct-answer {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        /* Кнопка удаления */
+        .delete-btn {
+            padding: 6px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        /* Загрузка и пустые данные */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-questions {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Навигационные ссылки */
+        .links {
+            margin-top: 30px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .links a:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        /* Сообщения */
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .action-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            .stat-card {
+                min-width: 100%;
+            }
+
+            .questions-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок с пользователем и кнопкой выхода -->
+        <div class="header">
+            <div>
+                <h1>📋 Управление вопросами теста</h1>
+                <div class="user-info">
+                    Вы вошли как: <span>{{ username }}</span>
+                </div>
+            </div>
+            <form action="/admin/logout" method="GET">
+                <button type="submit" class="logout-btn">Выйти</button>
+            </form>
+        </div>
+
+        <!-- Сообщения -->
+        <div id="message" class="message"></div>
+
+        <!-- Панель действий -->
+        <div class="action-panel">
+            <h2 style="color: #333; margin: 0;">Список вопросов</h2>
+            <div class="action-buttons">
+                <a href="/admin/statistics" class="btn btn-info">📊 Статистика</a>
+                <a href="/admin/logs" class="btn btn-info">📋 Логи действий</a>
+                <a href="/admin/session-info" class="btn btn-info">🔐 Сессия</a>
+                <a href="/admin/change-password" class="btn btn-warning">🔑 Сменить пароль</a>
+                <a href="/admin/questions/add" class="btn btn-success">➕ Добавить вопрос</a>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Всего вопросов</h3>
+                <div class="stat-value" id="totalQuestions">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Видимых</h3>
+                <div class="stat-value" id="visibleQuestions">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Скрытых</h3>
+                <div class="stat-value" id="hiddenQuestions">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Всего вариантов</h3>
+                <div class="stat-value" id="totalOptions">0</div>
+            </div>
+        </div>
+
+        <!-- Таблица вопросов -->
+        <table class="questions-table" id="questionsTable">
+            <thead>
+                <tr>
+                    <th class="question-id">ID</th>
+                    <th class="question-text">Вопрос</th>
+                    <th class="question-options">Варианты ответов</th>
+                    <th class="question-correct">Правильный</th>
+                    <th class="question-visible">Видимость</th>
+                    <th style="width: 100px;">Действия</th>
+                </tr>
+            </thead>
+            <tbody id="questionsTableBody">
+                <tr>
+                    <td colspan="6" class="loading">
+                        Загрузка вопросов...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Навигационные ссылки -->
+        <div class="links">
+            <a href="/">Перейти к тесту</a>
+            <a href="/results">Просмотреть результаты</a>
+        </div>
+    </div>
+
+    <script>
+        // Функция для экранирования HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Функция удаления вопроса
+        function deleteQuestion(questionId, questionText) {
+            if (confirm(`Вы уверены, что хотите удалить вопрос?\n"${questionText.substring(0, 50)}${questionText.length > 50 ? '...' : ''}"`)) {
+                fetch(`/admin/questions/delete/${questionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showMessage('✅ ' + data.message, 'success');
+                            // Перезагружаем список вопросов
+                            loadQuestions();
+                        } else {
+                            showMessage('❌ Ошибка: ' + data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showMessage('❌ Ошибка соединения: ' + error.message, 'error');
+                    });
+            }
+        }
+
+        // Функция показа сообщений
+        function showMessage(text, type) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`;
+            messageElement.style.display = 'block';
+
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Загрузка вопросов
+        function loadQuestions() {
+            fetch('/admin/api/questions')
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = '/admin/login';
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(questions => {
+                    updateStats(questions);
+                    renderQuestionsTable(questions);
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки вопросов:', error);
+                    document.getElementById('questionsTableBody').innerHTML = `
+                        <tr>
+                            <td colspan="6" style="color: #dc3545; text-align: center; padding: 40px;">
+                                Ошибка загрузки вопросов. Проверьте авторизацию.
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        // Обновление статистики
+        function updateStats(questions) {
+            const total = questions.length;
+            const visible = questions.filter(q => q.visible).length;
+            const hidden = total - visible;
+            const totalOptions = questions.reduce((sum, q) => sum + q.options.length, 0);
+
+            document.getElementById('totalQuestions').textContent = total;
+            document.getElementById('visibleQuestions').textContent = visible;
+            document.getElementById('hiddenQuestions').textContent = hidden;
+            document.getElementById('totalOptions').textContent = totalOptions;
+        }
+
+        // Рендеринг таблицы вопросов
+        function renderQuestionsTable(questions) {
+            const tbody = document.getElementById('questionsTableBody');
+
+            if (questions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-questions">
+                            Вопросы не найдены. Добавьте первый вопрос!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            questions.forEach(question => {
+                // Форматируем варианты ответов
+                let optionsHtml = '<ol style="margin: 0; padding-left: 20px;">';
+                question.options.forEach((option, index) => {
+                    const isCorrect = index === question.correct;
+                    const optionText = escapeHtml(option);
+                    optionsHtml += `
+                        <li style="
+                            color: ${isCorrect ? '#28a745' : '#666'};
+                            margin-bottom: 5px;
+                            font-weight: ${isCorrect ? '600' : 'normal'};
+                        ">
+                            ${String.fromCharCode(65 + index)}. ${optionText}
+                            ${isCorrect ? ' ✓' : ''}
+                        </li>
+                    `;
+                });
+                optionsHtml += '</ol>';
+
+                html += `
+                    <tr>
+                        <td class="question-id">${question.id}</td>
+                        <td class="question-text">${escapeHtml(question.question)}</td>
+                        <td class="question-options">${optionsHtml}</td>
+                        <td class="question-correct">
+                            <span class="correct-answer">
+                                ${String.fromCharCode(65 + question.correct)}
+                            </span>
+                        </td>
+                        <td class="question-visible">
+                            <span class="visible-${question.visible}">
+                                ${question.visible ? 'Видимый' : 'Скрытый'}
+                            </span>
+                        </td>
+                        <td>
+                            <button onclick="deleteQuestion(${question.id}, '${escapeHtml(question.question).replace(/'/g, "\\'")}')"
+                                    class="delete-btn">
+                                Удалить
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Загружаем вопросы при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Административная панель загружена');
+            loadQuestions();
+
+            // Горячие клавиши для отладки
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Shift+R для перезагрузки вопросов
+                if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                    e.preventDefault();
+                    console.log('Перезагрузка вопросов...');
+                    loadQuestions();
+                }
+
+                // Ctrl+Shift+A для перехода к добавлению вопроса
+                if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                    e.preventDefault();
+                    window.location.href = '/admin/questions/add';
+                }
+
+                // Ctrl+Shift+S для перехода к статистике
+                if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+                    e.preventDefault();
+                    window.location.href = '/admin/statistics';
+                }
+
+                // Ctrl+Shift+L для перехода к логам
+                if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+                    e.preventDefault();
+                    window.location.href = '/admin/logs';
+                }
+
+                // Ctrl+Shift+C для перехода к смене пароля
+                if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                    e.preventDefault();
+                    window.location.href = '/admin/change-password';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

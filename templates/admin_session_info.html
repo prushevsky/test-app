@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о сессии</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .user-info span {
+            color: #667eea;
+        }
+
+        .session-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+            text-align: right;
+            max-width: 300px;
+            word-break: break-all;
+        }
+
+        .security-tips {
+            background: #e8f4ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .security-tips h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .security-tips ul {
+            padding-left: 20px;
+            color: #666;
+        }
+
+        .security-tips li {
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .time-remaining {
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .time-remaining span {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .time-warning {
+            color: #dc3545 !important;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Информация о сессии</h1>
+            <div class="user-info">
+                Вы вошли как: <span>{{ username }}</span>
+            </div>
+        </div>
+
+        <div class="session-info">
+            <div class="info-item">
+                <span class="info-label">Имя пользователя:</span>
+                <span class="info-value">{{ session_data.username }}</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Время входа:</span>
+                <span class="info-value">{{ session_data.login_time }}</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">IP адрес:</span>
+                <span class="info-value">{{ session_data.ip_address }}</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">ID сессии:</span>
+                <span class="info-value">{{ session_data.session_id[:20] }}...</span>
+            </div>
+
+            {% if session_data.time_remaining > 0 %}
+            <div class="time-remaining">
+                Сессия истекает через:
+                <span {% if session_data.time_remaining < 300 %}class="time-warning"{% endif %}>
+                    {{ session_data.time_remaining // 60 }} минут {{ session_data.time_remaining % 60 }} секунд
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="security-tips">
+            <h3>🔒 Рекомендации по безопасности:</h3>
+            <ul>
+                <li>Не оставляйте админ-панель открытой на общественных компьютерах</li>
+                <li>Всегда выходите из системы после работы</li>
+                <li>Используйте сложные пароли и регулярно их меняйте</li>
+                <li>Время сессии ограничено 30 минутами неактивности</li>
+            </ul>
+        </div>
+
+        <div class="buttons">
+            <a href="/admin/questions" class="btn">Вернуться в админ-панель</a>
+            <a href="/admin/change-password" class="btn btn-secondary">Сменить пароль</a>
+            <a href="/admin/logout" class="btn btn-danger">Выйти из системы</a>
+        </div>
+    </div>
+
+    <script>
+        // Автоматическое обновление таймера сессии
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeRemainingElement = document.querySelector('.time-remaining span');
+
+            if (timeRemainingElement) {
+                // Извлекаем время из текста
+                const text = timeRemainingElement.textContent;
+                const match = text.match(/(\d+)\s*минут\s*(\d+)\s*секунд/);
+
+                if (match) {
+                    let minutes = parseInt(match[1]);
+                    let seconds = parseInt(match[2]);
+
+                    // Обновляем таймер каждую секунду
+                    const timer = setInterval(function() {
+                        seconds--;
+
+                        if (seconds < 0) {
+                            minutes--;
+                            seconds = 59;
+                        }
+
+                        if (minutes < 0) {
+                            clearInterval(timer);
+                            location.reload(); // Перезагружаем при истечении времени
+                            return;
+                        }
+
+                        // Обновляем отображение
+                        timeRemainingElement.textContent = `${minutes} минут ${seconds} секунд`;
+
+                        // Меняем цвет при низком времени
+                        if (minutes < 5) {
+                            timeRemainingElement.classList.add('time-warning');
+                        }
+                    }, 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

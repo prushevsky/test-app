@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Логи действий пользователей</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2em;
+        }
+
+        .user-info {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .user-info span {
+            color: #667eea;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Панель управления */
+        .control-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stats {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .stats span {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        /* Фильтры */
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        /* Таблица логов */
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .logs-table th,
+        .logs-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .logs-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+
+        .logs-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .log-date {
+            width: 100px;
+            white-space: nowrap;
+        }
+
+        .log-time {
+            width: 80px;
+            white-space: nowrap;
+        }
+
+        .log-user {
+            width: 150px;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .log-action {
+            min-width: 300px;
+        }
+
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .user-admin {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .user-guest {
+            color: #6c757d;
+        }
+
+        /* Пагинация */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .page-btn {
+            padding: 6px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .page-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Навигационные ссылки */
+        .links {
+            margin-top: 30px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .links a:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        /* Уведомления */
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        /* Подсветка важных действий */
+        .action-test-completed {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .action-test-started {
+            color: #17a2b8;
+        }
+
+        .action-admin {
+            color: #dc3545;
+            font-weight: 500;
+        }
+
+        .action-error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .control-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .logs-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="header">
+            <div>
+                <h1>📋 Логи действий пользователей</h1>
+                <div class="user-info">
+                    Вы вошли как: <span>{{ username }}</span>
+                </div>
+            </div>
+            <form action="/admin/logout" method="GET">
+                <button type="submit" class="logout-btn">Выйти</button>
+            </form>
+        </div>
+
+        <!-- Уведомления -->
+        <div id="message" class="message"></div>
+
+        <!-- Панель управления -->
+        <div class="control-panel">
+            <div class="stats">
+                Всего записей: <span id="totalLogs">{{ total_logs }}</span>
+                <span id="filteredStats" style="display: none;">
+                    (отфильтровано: <span id="filteredCount">0</span>)
+                </span>
+            </div>
+            <div class="action-buttons">
+                <button onclick="refreshLogs()" class="btn btn-info">🔄 Обновить</button>
+                <a href="/admin/statistics" class="btn btn-info">📊 Статистика</a>
+                <a href="/admin/questions" class="btn btn-info">📋 Вопросы</a>
+                <a href="/admin/session-info" class="btn btn-info">🔐 Сессия</a>
+                <a href="/admin/change-password" class="btn btn-warning">🔑 Сменить пароль</a>
+                <a href="/admin/logs/export" class="btn btn-success">📥 Экспорт в CSV</a>
+                <button onclick="clearLogs()" class="btn btn-danger">🗑️ Очистить логи</button>
+            </div>
+        </div>
+
+        <!-- Фильтры -->
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">Пользователь:</label>
+                <input type="text" id="filterUser" placeholder="Фильтр по имени">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Действие:</label>
+                <input type="text" id="filterAction" placeholder="Фильтр по действию">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Дата:</label>
+                <input type="date" id="filterDate">
+            </div>
+            <div class="filter-actions">
+                <button onclick="applyFilters()" class="btn">Применить фильтры</button>
+                <button onclick="resetFilters()" class="btn btn-warning">Сбросить</button>
+            </div>
+        </div>
+
+        <!-- Таблица логов -->
+        <table class="logs-table" id="logsTable">
+            <thead>
+                <tr>
+                    <th class="log-date">Дата</th>
+                    <th class="log-time">Время</th>
+                    <th class="log-user">Пользователь</th>
+                    <th class="log-action">Действие</th>
+                </tr>
+            </thead>
+            <tbody id="logsTableBody">
+                {% if logs %}
+                    {% for log in logs %}
+                    <tr class="log-row">
+                        <td class="log-date">{{ log.date }}</td>
+                        <td class="log-time">{{ log.time }}</td>
+                        <td class="log-user">
+                            <span class="{% if 'admin' in log.user.lower() or 'админ' in log.user.lower() %}user-admin{% else %}user-guest{% endif %}">
+                                {{ log.user }}
+                            </span>
+                        </td>
+                        <td class="log-action">
+                            <span class="
+                                {% if 'завершение теста' in log.action.lower() or 'результат' in log.action.lower() %}action-test-completed
+                                {% elif 'начало теста' in log.action.lower() or 'запрос вопросов' in log.action.lower() %}action-test-started
+                                {% elif 'админ' in log.action.lower() or 'выход' in log.action.lower() or 'вход' in log.action.lower() %}action-admin
+                                {% elif 'ошибка' in log.action.lower() %}action-error
+                                {% endif %}
+                            ">
+                                {{ log.action }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="no-logs">
+                            Логи действий пока отсутствуют
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <!-- Пагинация -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <!-- Будет заполнена JavaScript -->
+        </div>
+
+        <!-- Навигационные ссылки -->
+        <div class="links">
+            <a href="/admin/questions">← К вопросам</a>
+            <a href="/admin/statistics">📊 Статистика</a>
+            <a href="/">Перейти к тесту</a>
+        </div>
+    </div>
+
+    <script>
+        // Элементы страницы
+        const logsTableBody = document.getElementById('logsTableBody');
+        const totalLogsElement = document.getElementById('totalLogs');
+        const filteredStatsElement = document.getElementById('filteredStats');
+        const filteredCountElement = document.getElementById('filteredCount');
+        const paginationElement = document.getElementById('pagination');
+        const messageElement = document.getElementById('message');
+
+        // Настройки пагинации
+        const logsPerPage = 50;
+        let currentPage = 1;
+        let filteredLogs = [];
+        let allLogs = [];
+
+        // Функция загрузки логов через API
+        function loadLogs() {
+            const userFilter = document.getElementById('filterUser').value;
+            const actionFilter = document.getElementById('filterAction').value;
+            const dateFilter = document.getElementById('filterDate').value;
+
+            // Собираем параметры запроса
+            const params = new URLSearchParams();
+            if (userFilter) params.append('user', userFilter);
+            if (actionFilter) params.append('action', actionFilter);
+            if (dateFilter) params.append('date', dateFilter);
+
+            // Показываем загрузку
+            logsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="loading">
+                        Загрузка логов...
+                    </td>
+                </tr>
+            `;
+
+            // Загружаем логи
+            fetch(`/admin/api/logs?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    allLogs = data.logs;
+                    renderLogsTable();
+                    updateStats(data.total, data.filtered);
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки логов:', error);
+                    logsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="color: #dc3545; text-align: center; padding: 40px;">
+                                Ошибка загрузки логов
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        // Функция рендеринга таблицы логов
+        function renderLogsTable() {
+            if (allLogs.length === 0) {
+                logsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="no-logs">
+                            Логи не найдены
+                        </td>
+                    </tr>
+                `;
+                paginationElement.style.display = 'none';
+                return;
+            }
+
+            // Применяем пагинацию
+            const startIndex = (currentPage - 1) * logsPerPage;
+            const endIndex = startIndex + logsPerPage;
+            const pageLogs = allLogs.slice(startIndex, endIndex);
+
+            // Рендерим строки
+            let html = '';
+
+            pageLogs.forEach(log => {
+                const userClass = log.user.toLowerCase().includes('admin') ||
+                                  log.user.toLowerCase().includes('админ') ? 'user-admin' : 'user-guest';
+
+                let actionClass = '';
+                const actionLower = log.action.toLowerCase();
+
+                if (actionLower.includes('завершение теста') || actionLower.includes('результат')) {
+                    actionClass = 'action-test-completed';
+                } else if (actionLower.includes('начало теста') || actionLower.includes('запрос вопросов')) {
+                    actionClass = 'action-test-started';
+                } else if (actionLower.includes('админ') || actionLower.includes('выход') || actionLower.includes('вход')) {
+                    actionClass = 'action-admin';
+                } else if (actionLower.includes('ошибка')) {
+                    actionClass = 'action-error';
+                }
+
+                html += `
+                    <tr class="log-row">
+                        <td class="log-date">${log.date || ''}</td>
+                        <td class="log-time">${log.time || ''}</td>
+                        <td class="log-user">
+                            <span class="${userClass}">
+                                ${log.user || ''}
+                            </span>
+                        </td>
+                        <td class="log-action">
+                            <span class="${actionClass}">
+                                ${log.action || ''}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            logsTableBody.innerHTML = html;
+
+            // Рендерим пагинацию
+            renderPagination();
+        }
+
+        // Функция рендеринга пагинации
+        function renderPagination() {
+            const totalPages = Math.ceil(allLogs.length / logsPerPage);
+
+            if (totalPages <= 1) {
+                paginationElement.style.display = 'none';
+                return;
+            }
+
+            paginationElement.style.display = 'flex';
+
+            let html = '';
+
+            // Кнопка "Предыдущая"
+            html += `
+                <button class="page-btn" onclick="changePage(${currentPage - 1})"
+                        ${currentPage === 1 ? 'disabled style="opacity: 0.5;"' : ''}>
+                    ←
+                </button>
+            `;
+
+            // Кнопки страниц
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            // Корректируем, если выходим за пределы
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            // Первая страница
+            if (startPage > 1) {
+                html += `<button class="page-btn" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) {
+                    html += `<span style="padding: 6px 12px;">...</span>`;
+                }
+            }
+
+            // Основные страницы
+            for (let i = startPage; i <= endPage; i++) {
+                html += `
+                    <button class="page-btn ${i === currentPage ? 'active' : ''}"
+                            onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            // Последняя страница
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += `<span style="padding: 6px 12px;">...</span>`;
+                }
+                html += `<button class="page-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+
+            // Кнопка "Следующая"
+            html += `
+                <button class="page-btn" onclick="changePage(${currentPage + 1})"
+                        ${currentPage === totalPages ? 'disabled style="opacity: 0.5;"' : ''}>
+                    →
+                </button>
+            `;
+
+            // Информация о странице
+            html += `
+                <div style="padding: 6px 12px; color: #666;">
+                    Страница ${currentPage} из ${totalPages}
+                </div>
+            `;
+
+            paginationElement.innerHTML = html;
+        }
+
+        // Функция изменения страницы
+        function changePage(page) {
+            const totalPages = Math.ceil(allLogs.length / logsPerPage);
+
+            if (page < 1 || page > totalPages || page === currentPage) {
+                return;
+            }
+
+            currentPage = page;
+            renderLogsTable();
+
+            // Прокручиваем к верху таблицы
+            logsTableBody.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Функция обновления статистики
+        function updateStats(total, filtered = false) {
+            totalLogsElement.textContent = total;
+
+            if (filtered) {
+                filteredStatsElement.style.display = 'inline';
+                filteredCountElement.textContent = total;
+            } else {
+                filteredStatsElement.style.display = 'none';
+            }
+        }
+
+        // Функция применения фильтров
+        function applyFilters() {
+            currentPage = 1;
+            loadLogs();
+        }
+
+        // Функция сброса фильтров
+        function resetFilters() {
+            document.getElementById('filterUser').value = '';
+            document.getElementById('filterAction').value = '';
+            document.getElementById('filterDate').value = '';
+            currentPage = 1;
+            loadLogs();
+        }
+
+        // Функция обновления логов
+        function refreshLogs() {
+            loadLogs();
+            showMessage('✅ Логи обновлены', 'success');
+        }
+
+        // Функция очистки логов
+        function clearLogs() {
+            if (!confirm('Вы уверены, что хотите очистить все логи? Это действие нельзя отменить.')) {
+                return;
+            }
+
+            fetch('/admin/logs/clear', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('✅ ' + data.message, 'success');
+                    loadLogs();
+                } else {
+                    showMessage('❌ ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('❌ Ошибка очистки логов: ' + error.message, 'error');
+            });
+        }
+
+        // Функция показа сообщений
+        function showMessage(text, type) {
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`;
+            messageElement.style.display = 'block';
+
+            // Автоматическое скрытие через 5 секунд
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница логов загружена');
+
+            // Загружаем логи
+            loadLogs();
+
+            // Назначаем обработчики на фильтры (Enter для применения)
+            document.getElementById('filterUser').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') applyFilters();
+            });
+
+            document.getElementById('filterAction').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') applyFilters();
+            });
+
+            // Горячие клавиши для отладки
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Shift+L для обновления логов
+                if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+                    e.preventDefault();
+                    refreshLogs();
+                }
+
+                // Ctrl+Shift+R для сброса фильтров
+                if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                    e.preventDefault();
+                    resetFilters();
+                }
+
+                // Ctrl+Shift+S для перехода к статистике
+                if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+                    e.preventDefault();
+                    window.location.href = '/admin/statistics';
+                }
+
+                // Ctrl+Shift+Q для перехода к вопросам
+                if (e.ctrlKey && e.shiftKey && e.key === 'Q') {
+                    e.preventDefault();
+                    window.location.href = '/admin/questions';
+                }
+
+                // Ctrl+Shift+C для перехода к смене пароля
+                if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                    e.preventDefault();
+                    window.location.href = '/admin/change-password';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

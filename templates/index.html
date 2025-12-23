@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестирование - Главная страница</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .username-section {
+            margin-bottom: 30px;
+        }
+
+        .username-section h2 {
+            color: #444;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .question-container {
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .question {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .success-message h2 {
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .links {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Тестирование по программированию</h1>
+            <p>Проверьте свои знания в области веб-разработки</p>
+        </div>
+
+        <div class="error" id="errorMessage"></div>
+
+        <!-- Шаг 1: Ввод имени пользователя -->
+        <div class="username-section" id="usernameSection">
+            <h2>Введите ваше имя</h2>
+            <div class="form-group">
+                <label for="username">Ваше имя:</label>
+                <input type="text" id="username" placeholder="Например: Иван Иванов" maxlength="50">
+            </div>
+            <button class="btn-primary" onclick="startTest()">Начать тест</button>
+        </div>
+
+        <!-- Прогресс-бар -->
+        <div class="progress-bar" id="progressBar" style="display: none;">
+            <div class="progress" id="progress"></div>
+        </div>
+
+        <!-- Шаг 2: Вопросы теста -->
+        <div id="questionsContainer" style="display: none;">
+            <div id="questionsList"></div>
+            <div class="navigation">
+                <button class="btn-secondary" id="prevBtn" onclick="prevQuestion()" style="display: none;">← Назад</button>
+                <button class="btn-primary" id="nextBtn" onclick="nextQuestion()">Следующий →</button>
+                <button class="btn-success" id="submitBtn" onclick="submitTest()" style="display: none;">Завершить тест</button>
+            </div>
+        </div>
+
+        <!-- Загрузка -->
+        <div class="loading" id="loading">
+            <p>Загрузка вопросов...</p>
+        </div>
+
+        <!-- Успешное завершение -->
+        <div class="success-message" id="successMessage">
+            <h2>✅ Тест завершен!</h2>
+            <p>Ваши ответы успешно отправлены.</p>
+            <p>Вы можете просмотреть результаты тестирования.</p>
+            <div class="links">
+                <a href="/results">Просмотреть результаты</a>
+                <a href="#" onclick="location.reload()">Пройти тест еще раз</a>
+            </div>
+        </div>
+
+        <!-- Навигационные ссылки -->
+        <div class="links">
+            <a href="/results">Результаты</a>
+            <a href="/admin/questions">Админ-панель</a>
+        </div>
+
+        <script src="/static/script.js"></script>
+    </div>
+</body>
+</html>

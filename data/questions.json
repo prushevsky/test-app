@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "question": "Что такое HTML?",
+    "options": [
+      "Язык программирования",
+      "Язык разметки",
+      "База данных",
+      "Фреймворк"
+    ],
+    "correct": 1,
+    "visible": true
+  },
+  {
+    "id": 2,
+    "question": "Что такое CSS?",
+    "options": [
+      "Язык программирования",
+      "Каскадные таблицы стилей",
+      "База данных",
+      "Операционная система"
+    ],
+    "correct": 1,
+    "visible": true
+  },
+  {
+    "id": 3,
+    "question": "Что такое JavaScript?",
+    "options": [
+      "Язык разметки",
+      "Язык программирования",
+      "База данных",
+      "Текстовый редактор"
+    ],
+    "correct": 1,
+    "visible": true
+  },
+  {
+    "id": 4,
+    "question": "Какой тег используется для создания ссылки в HTML?",
+    "options": [
+      "&lt;link&gt;",
+      "&lt;a&gt;",
+      "&lt;href&gt;",
+      "&lt;url&gt;"
+    ],
+    "correct": 1,
+    "visible": true
+  },
+  {
+    "id": 5,
+    "question": "Что означает CSS?",
+    "options": [
+      "Computer Style Sheets",
+      "Creative Style System",
+      "Cascading Style Sheets",
+      "Colorful Style Sheets"
+    ],
+    "correct": 2,
+    "visible": true
+  },
+  {
+    "id": 6,
+    "question": "Какой метод HTTP используется для отправки данных на сервер?",
+    "options": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE"
+    ],
+    "correct": 1,
+    "visible": false
+  },
+  {
+    "id": 7,
+    "question": "Какой тег используется для подключения JavaScript файла?",
+    "options": [
+      "&lt;script&gt;",
+      "&lt;js&gt;",
+      "&lt;javascript&gt;",
+      "&lt;code&gt;"
+    ],
+    "correct": 0,
+    "visible": false
+  },
+  {
+    "id": 8,
+    "question": "Что из этого является языком программирования?",
+    "options": [
+      "Python",
+      "Docker",
+      "Git",
+      "Apache Airflow"
+    ],
+    "correct": 0,
+    "visible": false
+  }
+]
